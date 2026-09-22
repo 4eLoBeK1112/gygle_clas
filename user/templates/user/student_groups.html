@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Группы студентов</title>
+    <style>
+        :root { --ink: #20232a; --muted: #69707d; --line: #dfe3e8; --surface: #fff; --background: #f6f3ee; --accent: #a34b21; --highlight: #f8e6d9; }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; background: var(--background); color: var(--ink); font-family: Arial, sans-serif; }
+        .shell { width: min(1000px, calc(100% - 36px)); margin: auto; }
+        header { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+        a { color: var(--accent); font-weight: 700; text-decoration: none; }
+        .brand { color: var(--ink); font: 700 1.2rem Georgia, serif; }
+        .button { display: inline-block; padding: 11px 15px; border-radius: 5px; color: #fff; background: var(--accent); }
+        .button:hover { background: #803b1b; }
+        .back { display: block; margin-top: 26px; font-size: .9rem; }
+        h1 { margin: 26px 0 10px; font: 700 clamp(2.2rem, 6vw, 4rem) Georgia, serif; }
+        .intro { margin: 0 0 28px; color: var(--muted); line-height: 1.5; }
+        .groups { display: grid; gap: 14px; padding-bottom: 40px; }
+        .group { padding: 22px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+        .group h2 { margin: 0 0 8px; font: 700 1.4rem Georgia, serif; }
+        .group p { margin: 0 0 12px; color: var(--muted); line-height: 1.5; }
+        .meta { color: var(--accent); font-size: .88rem; font-weight: 700; }
+        .empty { padding: 28px; border: 1px dashed var(--line); color: var(--muted); background: var(--surface); }
+        @media (max-width: 560px) { header { align-items: flex-start; flex-direction: column; } .button { width: 100%; text-align: center; } }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header>
+            <a class="brand" href="{% url 'staff_home' %}">Панель сотрудника</a>
+            <a class="button" href="{% url 'create_student_group' %}">Создать группу</a>
+        </header>
+        <main>
+            <a class="back" href="{% url 'staff_home' %}">← Вернуться в панель</a>
+            <h1>Группы студентов</h1>
+            <p class="intro">Создавайте учебные группы и назначайте им студентов.</p>
+            <section class="groups">
+                {% for group in groups %}
+                    <article class="group">
+                        <h2><a href="{% url 'group_detail' group.id %}">{{ group.name }}</a></h2>
+                        <p>{{ group.description|default:"Описание пока не добавлено." }}</p>
+                        <div class="meta">Преподаватель: {{ group.teacher.username|default:"Не назначен" }} · Студентов: {{ group.students.count }} · <a href="{% url 'group_detail' group.id %}">Открыть</a> · <a href="{% url 'edit_student_group' group.id %}">Изменить</a></div>
+                    </article>
+                {% empty %}
+                    <div class="empty">Групп пока нет. Создайте первую группу.</div>
+                {% endfor %}
+            </section>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ group.name }}</title>
+    <style>
+        :root { --ink: #20232a; --muted: #69707d; --line: #dfe3e8; --surface: #fff; --background: #f6f3ee; --accent: #a34b21; --highlight: #f8e6d9; }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; background: var(--background); color: var(--ink); font-family: Arial, sans-serif; }
+        .shell { width: min(1050px, calc(100% - 36px)); margin: auto; }
+        header { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+        a { color: var(--accent); font-weight: 700; text-decoration: none; }
+        .brand { color: var(--ink); font: 700 1.2rem Georgia, serif; }
+        .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+        .button { display: inline-block; padding: 10px 13px; border-radius: 5px; color: #fff; background: var(--accent); font-size: .9rem; }
+        .button.alt { color: var(--ink); background: var(--surface); border: 1px solid var(--line); }
+        .back { display: block; margin-top: 26px; font-size: .9rem; }
+        h1 { margin: 25px 0 8px; font: 700 clamp(2.2rem, 6vw, 4rem) Georgia, serif; }
+        .description { margin: 0 0 28px; color: var(--muted); line-height: 1.5; }
+        .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-bottom: 40px; }
+        .panel { padding: 24px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+        h2 { margin: 0 0 18px; font: 700 1.4rem Georgia, serif; }
+        .item { padding: 14px 0; border-top: 1px solid var(--line); }
+        .item:first-child { padding-top: 0; border-top: 0; }
+        .item strong { display: block; margin-bottom: 5px; }
+        .item p { margin: 0; color: var(--muted); line-height: 1.45; }
+        .meta { color: var(--accent); font-size: .83rem; font-weight: 700; }
+        .empty { color: var(--muted); }
+        @media (max-width: 700px) { .columns { grid-template-columns: 1fr; } header { align-items: flex-start; flex-direction: column; } .actions { width: 100%; } .button { flex: 1; text-align: center; } }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header>
+            <a class="brand" href="{% if user.is_staff %}{% url 'staff_home' %}{% else %}{% url 'student_home' %}{% endif %}">Учебный портал</a>
+            {% if user.is_staff %}
+                <div class="actions">
+                    <a class="button alt" href="{% url 'edit_student_group' group.id %}">Изменить группу</a>
+                    <a class="button" href="{% url 'add_homework' group.id %}">Добавить ДЗ</a>
+                    <a class="button" href="{% url 'add_mark' group.id %}">Добавить оценку</a>
+                </div>
+            {% endif %}
+        </header>
+        <main>
+            <a class="back" href="{% if user.is_staff %}{% url 'student_groups' %}{% else %}{% url 'student_home' %}{% endif %}">← Назад</a>
+            <h1>{{ group.name }}</h1>
+            <p class="description">{{ group.description|default:"Описание пока не добавлено." }}</p>
+            <div class="columns">
+                <section class="panel">
+                    <h2>Домашние задания</h2>
+                    {% for homework in group.homework.all %}
+                        <article class="item">
+                            <strong>{{ homework.title }}</strong>
+                            <p>{{ homework.description|default:"Описание не добавлено." }}</p>
+                            <p class="meta">Срок: {{ homework.due_date|date:"d.m.Y"|default:"не указан" }}</p>
+                        </article>
+                    {% empty %}<p class="empty">Домашних заданий пока нет.</p>{% endfor %}
+                </section>
+                <section class="panel">
+                    <h2>Оценки</h2>
+                    {% for mark in marks %}
+                        <article class="item">
+                            <strong>{{ mark.student.user.get_full_name|default:mark.student.user.username }}</strong>
+                            <p class="meta">Оценка: {{ mark.value }}/100</p>
+                            {% if mark.comment %}<p>{{ mark.comment }}</p>{% endif %}
+                        </article>
+                    {% empty %}<p class="empty">Оценок пока нет.</p>{% endfor %}
+                </section>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
